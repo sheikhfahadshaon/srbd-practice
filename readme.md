@@ -1,1 +1,1 @@
-#[Contest Link](https://www.hackerrank.com/contests/target-samsung-13-nov19/challenges)
+# [Contest Link](https://www.hackerrank.com/contests/target-samsung-13-nov19/challenges)
