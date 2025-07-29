@@ -1,5 +1,3 @@
-// bitmask
-
 /*BISMILLAH*/
 #include <bits/stdc++.h>
 using namespace std;
@@ -11,48 +9,106 @@ using namespace std;
 #define ClearBit(x, k) (x &= ~(1LL << k))
 #define CheckBit(x, k) ((x >> k) & 1)
 
-int n, graph[15][15];
-int dp[15][(1 << 13)];
+bool horizontal[2][55][55], vertical[2][55][55];
+int n, m;
+bool vis[22][55][55], final_vis[55][55];
 
-int call(int city, int mask)
+/*
+vertical_0 -> up
+vertical_1 -> down
+
+horizontal_0 -> right
+horizontal_1 -> left
+
+*/
+
+void dfs(int x, int y, int remL)
 {
-    SetBit(mask, city);
-    if (mask == (1LL << n) - 1LL)
-    {
-        return graph[city][0];
-    }
-    if (dp[city][mask] != -1)
-        return dp[city][mask];
+    final_vis[x][y] = 1;
+    vis[remL][x][y] = 1;
+    // cout << x << ' ' << y << ' ' << remL << endl;
+    if (remL == 1)
+        return;
 
-    int ret = INT_MAX;
+    // go up
+    if (vertical[0][x][y] and x - 1 >= 0 and vertical[1][x - 1][y] and !vis[remL - 1][x - 1][y])
+        dfs(x - 1, y, remL - 1);
+    // go down
+    if (vertical[1][x][y] and x + 1 < n and vertical[0][x + 1][y] and !vis[remL - 1][x + 1][y])
+        dfs(x + 1, y, remL - 1);
 
-    for (int i = 0; i < n; i++)
-    {
-        if (CheckBit(mask, i) == 0)
-        {
-            ret = min(ret, graph[city][i] + call(i, mask));
-        }
-    }
-
-    return dp[city][mask] = ret;
+    // go right
+    if (horizontal[0][x][y] and y + 1 < m and horizontal[1][x][y + 1] and !vis[remL - 1][x][y + 1])
+        dfs(x, y + 1, remL - 1);
+    // go left
+    if (horizontal[1][x][y] and y - 1 >= 0 and horizontal[0][x][y - 1] and !vis[remL - 1][x][y - 1])
+        dfs(x, y - 1, remL - 1);
 }
 
 void solve()
 {
-    cin >> n;
-    for (int i = 1; i <= n; i++)
+    int x, y, l;
+    cin >> n >> m >> x >> y >> l;
+
+    for (int i = 0; i < n; i++)
     {
-        for (int j = 1; j <= n; j++)
-            cin >> graph[i - 1][j - 1];
+        for (int j = 0; j < m; j++)
+        {
+            final_vis[i][j] = vertical[0][i][j] = vertical[1][i][j] = horizontal[0][i][j] = horizontal[1][i][j] = 0;
+            for (int k = 0; k <= l; k++)
+                vis[k][i][j] = 0;
+        }
     }
 
-    for (int i = 0; i <= n; i++)
+    int grid[n][m];
+    for (int i = 0; i < n; i++)
     {
-        for (int j = 0; j < (1 << n); j++)
-            dp[i][j] = -1;
+        for (int j = 0; j < m; j++)
+        {
+            cin >> grid[i][j];
+
+            switch (grid[i][j])
+            {
+            case 1:
+                vertical[0][i][j] = vertical[1][i][j] = horizontal[0][i][j] = horizontal[1][i][j] = 1;
+                break;
+            case 2:
+                vertical[0][i][j] = vertical[1][i][j] = 1;
+                break;
+            case 3:
+                horizontal[0][i][j] = horizontal[1][i][j] = 1;
+                break;
+            case 4:
+                vertical[0][i][j] = horizontal[0][i][j] = 1;
+                break;
+            case 5:
+                vertical[1][i][j] = horizontal[0][i][j] = 1;
+                break;
+            case 6:
+                vertical[1][i][j] = horizontal[1][i][j] = 1;
+                break;
+            case 7:
+                vertical[0][i][j] = horizontal[1][i][j] = 1;
+                break;
+
+            default:
+                break;
+            }
+        }
     }
 
-    cout << call(0, 0) << endl;
+    dfs(x, y, l);
+
+    int ans = 0;
+    for (int i = 0; i < n; i++)
+    {
+        for (int j = 0; j < m; j++)
+        {
+            if (final_vis[i][j])
+                ans++;
+        }
+    }
+    cout << ans << endl;
 }
 
 signed main()
